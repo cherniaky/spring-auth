@@ -22,7 +22,7 @@ class JwtCore {
     public String generateToken(Authentication auth) {
         UserDetailsImpl user = (UserDetailsImpl) auth.getPrincipal();
         return Jwts.builder()
-                .subject("ehll")
+                .subject(user.getUsername())
                 .signWith(key)
                 .compact();
     }

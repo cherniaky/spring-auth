@@ -2,6 +2,7 @@ package com.example.demo;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +20,16 @@ public class TokenFilter extends OncePerRequestFilter {
 
     private JwtCore jwtCore;
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    public void setJwtCore(JwtCore jwtCore) {
+        this.jwtCore = jwtCore;
+    }
+
+    @Autowired
+    public void setUserDetailsService(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -44,6 +55,7 @@ public class TokenFilter extends OncePerRequestFilter {
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     userDetails = userDetailsService.loadUserByUsername(username);
                     auth = new UsernamePasswordAuthenticationToken(userDetails, null);
+                    System.out.println("auth: " + auth.getName());
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             }
