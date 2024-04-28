@@ -45,13 +45,11 @@ public class SecurityConfigurator {
         return new BCryptPasswordEncoder();
     }
 
-    // @Bean
-    // public AuthenticationManager
-    // authenticationManager(AuthenticationConfiguration
-    // authenticationConfiguration)
-    // throws Exception {
-    // return authenticationConfiguration.getAuthenticationManager();
-    // }
+    //@Bean
+    //public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+    //        throws Exception {
+    //    return authenticationConfiguration.getAuthenticationManager();
+    //}
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder)
@@ -62,20 +60,30 @@ public class SecurityConfigurator {
         return authenticationManagerBuilder.build();
     }
 
-    // @Bean
-    // @Primary
-    // public AuthenticationManagerBuilder
-    // configureAuthenticationManagerBuilder(AuthenticationManagerBuilder auth)
-    // throws Exception {
-    // auth.userDetailsService(userService).passwordEncoder(passwordEncoder());
-    // return auth;
-    // }
+    //@Bean
+    //@Primary
+    //public AuthenticationManagerBuilder configureAuthenticationManagerBuilder(AuthenticationManagerBuilder auth)
+    //        throws Exception {
+    //    auth.userDetailsService(userService).passwordEncoder(passwordEncoder());
+    //    return auth;
+    //}
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable().authorizeRequests().requestMatchers("/auth/**").permitAll().anyRequest().authenticated()
-                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
+        http.csrf(AbstractHttpConfigurer::disable).cors(httpSecurityCorsConfigurer -> {
+            httpSecurityCorsConfigurer.configurationSource(httpServletRequest -> {
+                return new CorsConfiguration().applyPermitDefaultValues();
+            });
+        }).exceptionHandling(exceptionHandlingConfigurer -> {
+            System.out.println("exceptionHandlingConfigurer");
+            exceptionHandlingConfigurer.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+        }).sessionManagement(sessionManagementConfigurer -> {
+            sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        }).authorizeHttpRequests(authorizeRequests -> {
+            authorizeRequests.requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/secured/user").authenticated()
+                    .anyRequest().permitAll();
+        }).addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }
