@@ -1,9 +1,11 @@
 package com.example.demo;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -38,7 +40,6 @@ public class TokenFilter extends OncePerRequestFilter {
         String jwt = null;
         String username = null;
         UserDetails userDetails = null;
-        UsernamePasswordAuthenticationToken auth = null;
         try {
             String headerAuth = request.getHeader("Authorization");
             if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
@@ -54,7 +55,7 @@ public class TokenFilter extends OncePerRequestFilter {
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     userDetails = userDetailsService.loadUserByUsername(username);
-                    auth = new UsernamePasswordAuthenticationToken(userDetails, null);
+                    Authentication auth = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), "", new ArrayList<>());
                     System.out.println("auth: " + auth.getName());
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }

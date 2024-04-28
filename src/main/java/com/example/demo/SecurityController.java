@@ -79,7 +79,6 @@ public class SecurityController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtCore.generateToken(authentication);
         return ResponseEntity.ok(jwt);
     }
